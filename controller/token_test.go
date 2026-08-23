@@ -11,11 +11,14 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/glebarez/sqlite"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,10 +35,11 @@ type tokenPageResponse struct {
 }
 
 type tokenResponseItem struct {
-	ID     int    `json:"id"`
-	Name   string `json:"name"`
-	Key    string `json:"key"`
-	Status int    `json:"status"`
+	ID           int    `json:"id"`
+	Name         string `json:"name"`
+	Key          string `json:"key"`
+	Status       int    `json:"status"`
+	UsedQuota24h int64  `json:"used_quota_24h"`
 }
 
 type tokenKeyResponse struct {
@@ -109,6 +113,7 @@ func setupTokenControllerTestDB(t *testing.T) *gorm.DB {
 
 	db := openTokenControllerTestDB(t)
 	migrateTokenControllerTestDB(t, db)
+	require.NoError(t, db.AutoMigrate(&model.Log{}))
 	return db
 }
 
@@ -482,6 +487,96 @@ func TestSearchTokensMasksKeyInResponse(t *testing.T) {
 	if strings.Contains(recorder.Body.String(), token.Key) {
 		t.Fatalf("search response leaked raw token key: %s", recorder.Body.String())
 	}
+}
+
+func TestGetAllTokensAggregatesUsedQuota24hOnceForCurrentUser(t *testing.T) {
+	db := setupTokenControllerTestDB(t)
+	usedToken := seedToken(t, db, 1, "used-token", "used1234token5678")
+	unusedToken := seedToken(t, db, 1, "unused-token", "none1234token5678")
+	otherUserToken := seedToken(t, db, 2, "other-token", "else1234token5678")
+	now := time.Now().Unix()
+	require.NoError(t, db.Create(&[]model.Log{
+		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 1, Quota: 1_500_000_000},
+		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 2, Quota: 1_500_000_000},
+		{UserId: 2, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 1, Quota: 400},
+		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeManage, CreatedAt: now - 1, Quota: 500},
+		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 86401, Quota: 600},
+		{UserId: 2, TokenId: otherUserToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 1, Quota: 700},
+	}).Error)
+
+	logQueryCount := 0
+	const callbackName = "test:token-list-used-quota-24h-query-count"
+	require.NoError(t, db.Callback().Query().Before("gorm:query").Register(callbackName, func(tx *gorm.DB) {
+		if tx.Statement.Table == "logs" {
+			logQueryCount++
+		}
+	}))
+	t.Cleanup(func() { db.Callback().Query().Remove(callbackName) })
+
+	ctx, recorder := newAuthenticatedContext(t, http.MethodGet, "/api/token/?p=1&size=10", nil, 1)
+	GetAllTokens(ctx)
+
+	response := decodeAPIResponse(t, recorder)
+	require.True(t, response.Success, response.Message)
+	var page tokenPageResponse
+	require.NoError(t, common.Unmarshal(response.Data, &page))
+	require.Len(t, page.Items, 2)
+	itemsByID := make(map[int]tokenResponseItem, len(page.Items))
+	for _, item := range page.Items {
+		itemsByID[item.ID] = item
+	}
+	assert.Equal(t, int64(3_000_000_000), itemsByID[usedToken.Id].UsedQuota24h)
+	assert.Zero(t, itemsByID[unusedToken.Id].UsedQuota24h)
+	assert.Equal(t, 1, logQueryCount)
+}
+
+func TestSearchTokensAggregatesUsedQuota24hOnce(t *testing.T) {
+	db := setupTokenControllerTestDB(t)
+	token := seedToken(t, db, 1, "usage-search-token", "find1234token5678")
+	require.NoError(t, db.Create(&model.Log{
+		UserId: 1, TokenId: token.Id, Type: model.LogTypeConsume,
+		CreatedAt: time.Now().Unix() - 1, Quota: 75,
+	}).Error)
+
+	logQueryCount := 0
+	const callbackName = "test:token-search-used-quota-24h-query-count"
+	require.NoError(t, db.Callback().Query().Before("gorm:query").Register(callbackName, func(tx *gorm.DB) {
+		if tx.Statement.Table == "logs" {
+			logQueryCount++
+		}
+	}))
+	t.Cleanup(func() { db.Callback().Query().Remove(callbackName) })
+
+	ctx, recorder := newAuthenticatedContext(t, http.MethodGet, "/api/token/search?keyword=usage-search-token&p=1&size=10", nil, 1)
+	SearchTokens(ctx)
+
+	response := decodeAPIResponse(t, recorder)
+	require.True(t, response.Success, response.Message)
+	var page tokenPageResponse
+	require.NoError(t, common.Unmarshal(response.Data, &page))
+	require.Len(t, page.Items, 1)
+	assert.Equal(t, int64(75), page.Items[0].UsedQuota24h)
+	assert.Equal(t, 1, logQueryCount)
+}
+
+func TestGetAllTokensReturnsAPIErrorWhenUsedQuota24hAggregationFails(t *testing.T) {
+	db := setupTokenControllerTestDB(t)
+	seedToken(t, db, 1, "aggregation-error-token", "fail1234token5678")
+	forcedError := fmt.Errorf("forced token usage aggregation failure")
+	const callbackName = "test:token-list-used-quota-24h-query-failure"
+	require.NoError(t, db.Callback().Query().Before("gorm:query").Register(callbackName, func(tx *gorm.DB) {
+		if tx.Statement.Table == "logs" {
+			tx.AddError(forcedError)
+		}
+	}))
+	t.Cleanup(func() { db.Callback().Query().Remove(callbackName) })
+
+	ctx, recorder := newAuthenticatedContext(t, http.MethodGet, "/api/token/?p=1&size=10", nil, 1)
+	GetAllTokens(ctx)
+
+	response := decodeAPIResponse(t, recorder)
+	assert.False(t, response.Success)
+	assert.Equal(t, "查询统计数据失败", response.Message)
 }
 
 func TestGetTokenMasksKeyInResponse(t *testing.T) {
