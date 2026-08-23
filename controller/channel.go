@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -476,6 +477,9 @@ func validateChannel(channel *model.Channel, isAdd bool) error {
 		return fmt.Errorf("channel cannot be empty")
 	}
 
+	if channel.Ratio != nil && (*channel.Ratio < 0 || math.IsNaN(*channel.Ratio) || math.IsInf(*channel.Ratio, 0)) {
+		return fmt.Errorf("channel ratio must be a finite number greater than or equal to 0")
+	}
 	// 校验 channel settings
 	if err := channel.ValidateSettings(); err != nil {
 		return fmt.Errorf("渠道额外设置[channel setting] 格式错误：%s", err.Error())
@@ -1087,6 +1091,12 @@ func UpdateChannel(c *gin.Context) {
 	if err != nil {
 		common.ApiError(c, err)
 		return
+	}
+	if _, ratioProvided := requestData["ratio"]; ratioProvided {
+		if err = model.UpdateChannelRatio(channel.Id, channel.Ratio); err != nil {
+			common.ApiError(c, err)
+			return
+		}
 	}
 	model.InitChannelCache()
 	if proxyChanged {

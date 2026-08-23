@@ -56,6 +56,7 @@ export const channelSchema = z.object({
   model_mapping: z.string().nullish(),
   status_code_mapping: z.string().nullish(),
   priority: z.number().nullish(),
+  ratio: z.number().nullish(),
   auto_ban: z.number().nullish(),
   other_info: z.string().default(''),
   tag: z.string().nullish(),
@@ -350,6 +351,7 @@ export interface ChannelFormData {
   group: string
   model_mapping?: string
   priority?: number
+  ratio?: number
   weight?: number
   test_model?: string
   auto_ban?: number

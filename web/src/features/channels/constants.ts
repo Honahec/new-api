@@ -369,6 +369,8 @@ export const FIELD_DESCRIPTIONS = {
   MODEL_MAPPING:
     'Map request model names to actual provider model names (JSON format)',
   PRIORITY: 'Higher priority channels are selected first',
+  RATIO:
+    'Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.',
   WEIGHT: 'Used for load balancing. Higher weight = more requests',
   TEST_MODEL: 'Model to use when testing channel connectivity',
   AUTO_BAN: 'Automatically disable channel on repeated failures',

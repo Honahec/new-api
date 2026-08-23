@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relaykit/types"
@@ -15,6 +16,44 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )
+
+func TestHandleGroupRatioChannelOverridePriority(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	originalGroupRatios := ratio_setting.GroupRatio2JSONString()
+	originalSpecialRatios := ratio_setting.GroupGroupRatio2JSONString()
+	t.Cleanup(func() {
+		require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(originalGroupRatios))
+		require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(originalSpecialRatios))
+	})
+	require.NoError(t, ratio_setting.UpdateGroupRatioByJSONString(`{"vip":2}`))
+	require.NoError(t, ratio_setting.UpdateGroupGroupRatioByJSONString(`{"default":{"vip":3}}`))
+
+	tests := []struct {
+		name              string
+		channelRatio      *float64
+		expectedRatio     float64
+		expectedSpecial   float64
+		expectedIsSpecial bool
+	}{
+		{name: "nil inherits complete special group rule", expectedRatio: 3, expectedSpecial: 3, expectedIsSpecial: true},
+		{name: "zero is a final channel override", channelRatio: common.GetPointer(0.0), expectedRatio: 0, expectedSpecial: -1},
+		{name: "positive is a final channel override", channelRatio: common.GetPointer(1.5), expectedRatio: 1.5, expectedSpecial: -1},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+			common.SetContextKey(ctx, constant.ContextKeyChannelRatio, test.channelRatio)
+			info := &relaycommon.RelayInfo{UserGroup: "default", UsingGroup: "vip"}
+
+			got := HandleGroupRatio(ctx, info)
+
+			require.Equal(t, test.expectedRatio, got.GroupRatio)
+			require.Equal(t, test.expectedSpecial, got.GroupSpecialRatio)
+			require.Equal(t, test.expectedIsSpecial, got.HasSpecialRatio)
+		})
+	}
+}
 
 func TestModelPriceHelperTieredUsesPreloadedRequestInput(t *testing.T) {
 	gin.SetMode(gin.TestMode)

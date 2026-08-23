@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
+	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
@@ -55,16 +56,26 @@ func HandleGroupRatio(ctx *gin.Context, relayInfo *relaycommon.RelayInfo) hostty
 		relayInfo.UsingGroup = autoGroup.(string)
 	}
 
-	// check user group special ratio
+	// Preserve the complete legacy group-ratio lookup when the channel does not
+	// provide an override, including user-group special ratios.
 	userGroupRatio, ok := ratio_setting.GetGroupGroupRatio(relayInfo.UserGroup, relayInfo.UsingGroup)
 	if ok {
-		// user group special ratio
 		groupRatioInfo.GroupSpecialRatio = userGroupRatio
 		groupRatioInfo.GroupRatio = userGroupRatio
 		groupRatioInfo.HasSpecialRatio = true
 	} else {
-		// normal group ratio
 		groupRatioInfo.GroupRatio = ratio_setting.GetGroupRatio(relayInfo.UsingGroup)
+	}
+
+	// A channel ratio is the final group multiplier. Explicit zero is valid and
+	// must not be confused with an absent override.
+	if channelRatio, exists := common.GetContextKeyType[*float64](ctx, constant.ContextKeyChannelRatio); exists {
+		relayInfo.ChannelRatio = channelRatio
+	}
+	if relayInfo.ChannelRatio != nil {
+		groupRatioInfo.GroupRatio = *relayInfo.ChannelRatio
+		groupRatioInfo.GroupSpecialRatio = -1
+		groupRatioInfo.HasSpecialRatio = false
 	}
 
 	return groupRatioInfo

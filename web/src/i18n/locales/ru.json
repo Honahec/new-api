@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "Использование за 24 ч",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "Основная модель",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Приоритет повторного использования последнего успешного канала на основе ключей из контекста запроса (липкая маршрутизация)",
     "Priority": "Приоритет",
+    "Channel Ratio": "Коэффициент канала",
+    "Inherit group ratio": "Наследовать коэффициент группы",
+    "Channel ratio must be at least 0": "Коэффициент канала должен быть не меньше 0",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "Оставьте пустым, чтобы наследовать коэффициент группы. Значение 0 делает использование бесплатным; любое неотрицательное значение переопределяет коэффициент группы.",
     "Priority (Default)": "Приоритет (По умолчанию)",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "Уровень приоритета от 0 (самый низкий) до 10 (самый высокий), по умолчанию 5",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "Порядок приоритета для автоматического назначения групп. Новые токены ротируются по этому списку.",
