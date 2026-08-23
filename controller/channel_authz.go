@@ -30,6 +30,15 @@ func channelHasSensitiveChanges(channel *PatchChannel, origin *model.Channel, re
 	if _, ok := requestData["settings"]; ok && channel.OtherSettings != origin.OtherSettings {
 		return true
 	}
+	if _, ok := requestData["ratio"]; ok {
+		if channel.Ratio == nil || origin.Ratio == nil {
+			if channel.Ratio != origin.Ratio {
+				return true
+			}
+		} else if *channel.Ratio != *origin.Ratio {
+			return true
+		}
+	}
 	if _, ok := requestData["key_mode"]; ok && channel.KeyMode != nil {
 		return true
 	}
@@ -71,6 +80,7 @@ var channelSensitiveFields = map[string]struct{}{
 	"other":               {},
 	"settings":            {},
 	"key_mode":            {},
+	"ratio":               {},
 }
 
 // channelOperationalFields lists fields managed by operation endpoints instead
@@ -127,7 +137,6 @@ var channelNonSensitiveFields = map[string]struct{}{
 	"model_mapping":       {},
 	"status_code_mapping": {},
 	"priority":            {},
-	"ratio":               {},
 	"auto_ban":            {},
 	"other_info":          {},
 	"tag":                 {},

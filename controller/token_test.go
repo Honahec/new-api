@@ -498,6 +498,7 @@ func TestGetAllTokensAggregatesUsedQuota24hOnceForCurrentUser(t *testing.T) {
 	require.NoError(t, db.Create(&[]model.Log{
 		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 1, Quota: 1_500_000_000},
 		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 2, Quota: 1_500_000_000},
+		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now, Quota: 123},
 		{UserId: 2, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 1, Quota: 400},
 		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeManage, CreatedAt: now - 1, Quota: 500},
 		{UserId: 1, TokenId: usedToken.Id, Type: model.LogTypeConsume, CreatedAt: now - 86401, Quota: 600},
@@ -525,7 +526,7 @@ func TestGetAllTokensAggregatesUsedQuota24hOnceForCurrentUser(t *testing.T) {
 	for _, item := range page.Items {
 		itemsByID[item.ID] = item
 	}
-	assert.Equal(t, int64(3_000_000_000), itemsByID[usedToken.Id].UsedQuota24h)
+	assert.Equal(t, int64(3_000_000_123), itemsByID[usedToken.Id].UsedQuota24h)
 	assert.Zero(t, itemsByID[unusedToken.Id].UsedQuota24h)
 	assert.Equal(t, 1, logQueryCount)
 }

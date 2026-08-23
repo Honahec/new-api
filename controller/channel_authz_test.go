@@ -61,6 +61,16 @@ func TestChannelHasSensitiveChanges(t *testing.T) {
 		assert.True(t, channelHasSensitiveChanges(&updated, origin, map[string]any{"header_override": newHeaderOverride}))
 	})
 
+	t.Run("channel ratio change", func(t *testing.T) {
+		originalRatio := 1.0
+		updatedRatio := 0.0
+		origin.Ratio = &originalRatio
+		updated := PatchChannel{Channel: *origin}
+		updated.Ratio = &updatedRatio
+
+		assert.True(t, channelHasSensitiveChanges(&updated, origin, map[string]any{"ratio": updatedRatio}))
+	})
+
 	t.Run("omitted sensitive fields do not use zero values", func(t *testing.T) {
 		updated := PatchChannel{}
 		updated.Id = origin.Id

@@ -91,13 +91,13 @@ func GetUserTokenUsedQuota24h(userId int, tokenIds []int) (map[int]int64, error)
 		return usedQuotaByToken, nil
 	}
 
-	end := time.Now().Unix()
+	endExclusive := time.Now().Unix() + 1
 	var stats []tokenUsedQuota24h
 	err := LOG_DB.Model(&Log{}).
 		Select("token_id, COALESCE(SUM(quota), 0) AS quota").
 		Where("user_id = ? AND token_id IN ?", userId, tokenIds).
 		Where("type = ?", LogTypeConsume).
-		Where("created_at >= ? AND created_at < ?", end-86400, end).
+		Where("created_at >= ? AND created_at < ?", endExclusive-86400, endExclusive).
 		Group("token_id").
 		Find(&stats).Error
 	if err != nil {
