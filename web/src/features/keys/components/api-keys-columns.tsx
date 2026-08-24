@@ -191,6 +191,17 @@ export function useApiKeysColumns(now: number): ColumnDef<ApiKey>[] {
       size: 170,
     },
     {
+      accessorKey: 'used_quota_24h',
+      header: t('24h Usage'),
+      cell: ({ row }) => (
+        <span className='tabular-nums'>
+          {formatQuota(row.original.used_quota_24h)}
+        </span>
+      ),
+      size: 130,
+      meta: { mobileHidden: true },
+    },
+    {
       accessorKey: 'group',
       header: t('Group'),
       cell: ({ row }) => {

@@ -1119,6 +1119,26 @@ export function useChannelsColumns(
         size: 100,
       },
 
+      // Billing ratio column
+      {
+        accessorKey: 'ratio',
+        header: t('Channel Ratio'),
+        meta: { mobileHidden: true },
+        cell: ({ row }) => {
+          const ratio = row.original.ratio
+          if (ratio == null) {
+            return (
+              <span className='text-muted-foreground text-xs'>
+                {t('Inherit group ratio')}
+              </span>
+            )
+          }
+          return <span className='font-medium tabular-nums'>{ratio}×</span>
+        },
+        size: 130,
+        enableSorting: false,
+      },
+
       // Weight column
       {
         accessorKey: 'weight',

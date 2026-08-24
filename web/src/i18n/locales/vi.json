@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "Mức sử dụng trong 24 giờ",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "Mô hình chính",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Ưu tiên sử dụng lại kênh thành công gần nhất dựa trên các khóa trích xuất từ ngữ cảnh yêu cầu (định tuyến dính)",
     "Priority": "Ưu tiên",
+    "Channel Ratio": "Hệ số kênh",
+    "Inherit group ratio": "Kế thừa hệ số nhóm",
+    "Channel ratio must be at least 0": "Hệ số kênh phải lớn hơn hoặc bằng 0",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "Để trống để kế thừa hệ số nhóm. Đặt 0 để sử dụng miễn phí; giá trị không âm sẽ ghi đè hệ số nhóm.",
     "Priority (Default)": "Ưu tiên (Mặc định)",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "Mức độ ưu tiên từ 0 (thấp nhất) đến 10 (cao nhất), mặc định là 5",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "Thứ tự ưu tiên cho việc gán nhóm tự động. Các token mới sẽ luân phiên qua danh sách này.",

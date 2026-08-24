@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "Utilisation sur 24 h",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "Modèle principal",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Priorise la réutilisation du dernier canal ayant réussi, basé sur les clés extraites du contexte de la requête (routage persistant)",
     "Priority": "Priorité",
+    "Channel Ratio": "Coefficient du canal",
+    "Inherit group ratio": "Hériter du coefficient du groupe",
+    "Channel ratio must be at least 0": "Le coefficient du canal doit être supérieur ou égal à 0",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "Laissez vide pour hériter du coefficient du groupe. Définissez 0 pour un usage gratuit ; toute valeur non négative remplace le coefficient du groupe.",
     "Priority (Default)": "Priorité (Par défaut)",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "Niveau de priorité de 0 (le plus bas) à 10 (le plus élevé), la valeur par défaut est 5",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "Ordre de priorité pour l'attribution automatique des groupes. Les nouveaux jetons alternent dans cette liste.",

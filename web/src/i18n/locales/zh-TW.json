@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "24 小時用量",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "主模型",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "基於請求上下文提取的 Key，優先複用上一次成功的渠道（粘滯選路）",
     "Priority": "優先級",
+    "Channel Ratio": "渠道倍率",
+    "Inherit group ratio": "繼承分組倍率",
+    "Channel ratio must be at least 0": "渠道倍率不能小於 0",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "留空時繼承分組倍率；填 0 表示免費，其他非負數將直接覆蓋分組倍率。",
     "Priority (Default)": "優先級（預設）",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "優先級，從 0（最低）到 10（最高），預設為 5",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "自動分組分配的優先級順序。新 token 將按此清單輪換。",

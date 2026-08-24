@@ -337,6 +337,7 @@ function hasAdvancedSettingsValues(values: ChannelFormValues): boolean {
     values.tag?.trim() ||
     values.remark?.trim() ||
     values.priority ||
+    values.ratio != null ||
     values.weight ||
     values.proxy?.trim() ||
     values.system_prompt?.trim() ||
@@ -738,6 +739,7 @@ export function ChannelMutateDrawer({
   const currentSettings = form.watch('settings')
   const currentAdvancedCustom = form.watch('advanced_custom')
   const currentPriority = form.watch('priority')
+  const currentRatio = form.watch('ratio')
   const currentWeight = form.watch('weight')
   const currentTestModel = form.watch('test_model')
   const currentAutoBan = form.watch('auto_ban')
@@ -1005,6 +1007,7 @@ export function ChannelMutateDrawer({
   const advancedSummary = advancedHaveErrors ? t('Error') : undefined
   const routingStrategyConfigured = Boolean(
     currentPriority ||
+    currentRatio != null ||
     currentWeight ||
     currentTestModel?.trim() ||
     (currentAutoBan ?? 1) !== 1
@@ -3668,6 +3671,38 @@ export function ChannelMutateDrawer({
                                   </FormItem>
                                 )}
                               />
+                              <FormField
+                                control={form.control}
+                                name='ratio'
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>{t('Channel Ratio')}</FormLabel>
+                                    <FormControl>
+                                      <Input
+                                        type='number'
+                                        min={0}
+                                        step='any'
+                                        placeholder={t('Inherit group ratio')}
+                                        {...field}
+                                        value={field.value ?? ''}
+                                        onChange={(event) => {
+                                          const rawValue = event.target.value
+                                          field.onChange(
+                                            rawValue === ''
+                                              ? undefined
+                                              : Number(rawValue)
+                                          )
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormDescription>
+                                      {t(FIELD_DESCRIPTIONS.RATIO)}
+                                    </FormDescription>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
 
                               <FormField
                                 control={form.control}

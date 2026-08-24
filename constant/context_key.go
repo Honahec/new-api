@@ -27,6 +27,7 @@ const (
 	ContextKeyChannelCreateTime        ContextKey = "channel_create_time"
 	ContextKeyChannelBaseUrl           ContextKey = "base_url"
 	ContextKeyChannelType              ContextKey = "channel_type"
+	ContextKeyChannelRatio             ContextKey = "channel_ratio"
 	ContextKeyChannelSetting           ContextKey = "channel_setting"
 	ContextKeyChannelOtherSetting      ContextKey = "channel_other_setting"
 	ContextKeyChannelParamOverride     ContextKey = "param_override"

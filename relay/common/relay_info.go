@@ -60,6 +60,7 @@ type ChannelMeta struct {
 	ChannelId            int
 	ChannelIsMultiKey    bool
 	ChannelMultiKeyIndex int
+	Ratio                *float64
 	ChannelBaseUrl       string
 	ApiType              int
 	ApiVersion           string
@@ -86,6 +87,7 @@ type RelayInfo struct {
 	TokenGroup        string
 	UserId            int
 	UsingGroup        string // 使用的分组，当auto跨分组重试时，会变动
+	ChannelRatio      *float64
 	UserGroup         string // 用户所在分组
 	TokenUnlimited    bool
 	StartTime         time.Time
@@ -195,6 +197,7 @@ func (info *RelayInfo) InitChannelMeta(c *gin.Context) {
 		ChannelId:            common.GetContextKeyInt(c, constant.ContextKeyChannelId),
 		ChannelIsMultiKey:    common.GetContextKeyBool(c, constant.ContextKeyChannelIsMultiKey),
 		ChannelMultiKeyIndex: common.GetContextKeyInt(c, constant.ContextKeyChannelMultiKeyIndex),
+		Ratio:                channelRatioFromContext(c),
 		ChannelBaseUrl:       common.GetContextKeyString(c, constant.ContextKeyChannelBaseUrl),
 		ApiType:              apiType,
 		ApiVersion:           c.GetString("api_version"),
@@ -207,6 +210,7 @@ func (info *RelayInfo) InitChannelMeta(c *gin.Context) {
 		IsModelMapped:        false,
 		SupportStreamOptions: false,
 	}
+	info.ChannelRatio = channelMeta.Ratio
 
 	if channelType == constant.ChannelTypeAzure {
 		channelMeta.ApiVersion = GetAPIVersion(c)
@@ -245,6 +249,11 @@ func (info *RelayInfo) InitChannelMeta(c *gin.Context) {
 	if info.Request != nil {
 		info.Request.SetModelName(info.OriginModelName)
 	}
+}
+
+func channelRatioFromContext(c *gin.Context) *float64 {
+	ratio, _ := common.GetContextKeyType[*float64](c, constant.ContextKeyChannelRatio)
+	return ratio
 }
 
 func (info *RelayInfo) ToString() string {
@@ -512,6 +521,7 @@ func genBaseRelayInfo(c *gin.Context, request dto.Request) *RelayInfo {
 		UserQuota:  common.GetContextKeyInt(c, constant.ContextKeyUserQuota),
 		UserEmail:  common.GetContextKeyString(c, constant.ContextKeyUserEmail),
 
+		ChannelRatio:    channelRatioFromContext(c),
 		OriginModelName: common.GetContextKeyString(c, constant.ContextKeyOriginalModel),
 
 		TokenId:        common.GetContextKeyInt(c, constant.ContextKeyTokenId),

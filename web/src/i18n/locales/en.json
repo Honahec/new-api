@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "24h Usage",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "Primary Model",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)",
     "Priority": "Priority",
+    "Channel Ratio": "Channel Ratio",
+    "Inherit group ratio": "Inherit group ratio",
+    "Channel ratio must be at least 0": "Channel ratio must be at least 0",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.",
     "Priority (Default)": "Priority (Default)",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "Priority level from 0 (lowest) to 10 (highest), default is 5",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "Priority order for automatic group assignment. New tokens rotate through this list.",

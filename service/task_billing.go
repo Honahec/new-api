@@ -309,14 +309,19 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 		return
 	}
 
-	groupRatio := ratio_setting.GetGroupRatio(group)
-	userGroupRatio, hasUserGroupRatio := ratio_setting.GetGroupGroupRatio(group, group)
-
 	var finalGroupRatio float64
-	if hasUserGroupRatio {
-		finalGroupRatio = userGroupRatio
+	if billingContext := task.PrivateData.BillingContext; billingContext != nil {
+		// Keep the multiplier selected when the task was submitted. This also
+		// preserves an explicit zero channel override.
+		finalGroupRatio = billingContext.GroupRatio
 	} else {
-		finalGroupRatio = groupRatio
+		groupRatio := ratio_setting.GetGroupRatio(group)
+		userGroupRatio, hasUserGroupRatio := ratio_setting.GetGroupGroupRatio(group, group)
+		if hasUserGroupRatio {
+			finalGroupRatio = userGroupRatio
+		} else {
+			finalGroupRatio = groupRatio
+		}
 	}
 
 	// 计算 OtherRatios 乘积（视频折扣、时长等）

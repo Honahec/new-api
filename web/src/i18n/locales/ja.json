@@ -1,5 +1,6 @@
 {
   "translation": {
+    "24h Usage": "24時間の使用量",
     "360": "360",
     "1000": "1000",
     "10000": "10000",
@@ -3574,6 +3575,10 @@
     "Primary Model": "プライマリモデル",
     "Prioritize reusing the last successful channel based on keys extracted from request context (sticky routing)": "リクエストコンテキストから抽出したキーに基づいて、前回成功したチャネルを優先的に再利用します（スティッキールーティング）",
     "Priority": "優先度",
+    "Channel Ratio": "チャネル倍率",
+    "Inherit group ratio": "グループ倍率を継承",
+    "Channel ratio must be at least 0": "チャネル倍率は 0 以上である必要があります",
+    "Leave empty to inherit the group ratio. Set 0 for free usage; a non-negative value overrides the group ratio.": "空欄の場合はグループ倍率を継承します。0 は無料、それ以外の非負値はグループ倍率を上書きします。",
     "Priority (Default)": "優先度 (デフォルト)",
     "Priority level from 0 (lowest) to 10 (highest), default is 5": "優先度レベル (0が最低、10が最高、デフォルトは5)",
     "Priority order for automatic group assignment. New tokens rotate through this list.": "自動グループ割り当ての優先順位。新しいトークンはこのリストをローテーションします。",

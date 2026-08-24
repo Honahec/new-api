@@ -80,6 +80,37 @@ type Log struct {
 	Other             string `json:"other"`
 }
 
+type tokenUsedQuota24h struct {
+	TokenId int   `gorm:"column:token_id"`
+	Quota   int64 `gorm:"column:quota"`
+}
+
+func GetUserTokenUsedQuota24h(userId int, tokenIds []int) (map[int]int64, error) {
+	usedQuotaByToken := make(map[int]int64, len(tokenIds))
+	if len(tokenIds) == 0 {
+		return usedQuotaByToken, nil
+	}
+
+	endExclusive := time.Now().Unix() + 1
+	var stats []tokenUsedQuota24h
+	err := LOG_DB.Model(&Log{}).
+		Select("token_id, COALESCE(SUM(quota), 0) AS quota").
+		Where("user_id = ? AND token_id IN ?", userId, tokenIds).
+		Where("type = ?", LogTypeConsume).
+		Where("created_at >= ? AND created_at < ?", endExclusive-86400, endExclusive).
+		Group("token_id").
+		Find(&stats).Error
+	if err != nil {
+		common.SysError("failed to query token usage in the last 24 hours: " + err.Error())
+		return nil, errors.New("查询统计数据失败")
+	}
+
+	for _, stat := range stats {
+		usedQuotaByToken[stat.TokenId] = stat.Quota
+	}
+	return usedQuotaByToken, nil
+}
+
 // don't use iota, avoid change log type value
 const (
 	LogTypeUnknown = 0
