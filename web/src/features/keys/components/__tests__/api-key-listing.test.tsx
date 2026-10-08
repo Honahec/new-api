@@ -64,6 +64,7 @@ const key = apiKeySchema.parse({
   status: 1,
   remain_quota: 40_000_000,
   used_quota: 60_000_000,
+  used_quota_24h: 1_000_000,
   unlimited_quota: false,
   expired_time: -1,
   created_time: 0,
